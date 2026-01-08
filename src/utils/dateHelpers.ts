@@ -1,14 +1,14 @@
-import { format, startOfDay, endOfDay, startOfMonth, endOfMonth, isWithinInterval, parseISO, isSameDay, isSameMonth } from 'date-fns';
+import { format, startOfMonth, endOfMonth, isWithinInterval, parseISO, isSameDay, isSameMonth } from 'date-fns';
 
 import { Expense } from '../types/Expense';
 
 export const getDailyExpenses = (expenses: Expense[], date: Date = new Date()): Expense[] => {
-  const dayStart = startOfDay(date);
-  const dayEnd = endOfDay(date);
+  const targetDateString = format(date, 'yyyy-MM-dd');
   
   return expenses.filter(expense => {
-    const expenseDate = parseISO(expense.date);
-    return isWithinInterval(expenseDate, { start: dayStart, end: dayEnd });
+    // Compare date strings directly to avoid timezone issues
+    const expenseDateString = expense.date.split('T')[0];
+    return expenseDateString === targetDateString;
   });
 };
 

@@ -14,8 +14,10 @@ interface IncomeFormProps {
 
 export const IncomeForm = ({ onClose, initialIncome }: IncomeFormProps) => {
   const { addIncome, updateIncome } = useExpensesStore();
+  // When adding, always use today's date. When editing, use the income date.
+  const todayDate = new Date().toISOString().split('T')[0];
   const [amount, setAmount] = useState(initialIncome?.amount.toString() || '');
-  const [date, setDate] = useState(initialIncome?.date || new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(initialIncome?.date || todayDate);
   const [note, setNote] = useState(initialIncome?.note || '');
   const [source, setSource] = useState(initialIncome?.source || '');
 
@@ -34,9 +36,10 @@ export const IncomeForm = ({ onClose, initialIncome }: IncomeFormProps) => {
         source: source || undefined,
       });
     } else {
+      // When adding new income, always use today's date
       addIncome({
         amount: parseFloat(amount),
-        date,
+        date: todayDate,
         note,
         source: source || undefined,
       });
@@ -90,18 +93,20 @@ export const IncomeForm = ({ onClose, initialIncome }: IncomeFormProps) => {
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Date
-            </label>
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              required
-            />
-          </div>
+          {initialIncome && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Date
+              </label>
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                required
+              />
+            </div>
+          )}
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">

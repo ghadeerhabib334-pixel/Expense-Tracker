@@ -15,9 +15,11 @@ interface ExpenseFormProps {
 
 export const ExpenseForm = ({ onClose, initialExpense }: ExpenseFormProps) => {
   const { addExpense, updateExpense, categories } = useExpensesStore();
+  // When adding, always use today's date. When editing, use the expense date.
+  const todayDate = new Date().toISOString().split('T')[0];
   const [amount, setAmount] = useState(initialExpense?.amount.toString() || '');
   const [categoryId, setCategoryId] = useState(initialExpense?.categoryId || categories[0]?.id || '');
-  const [date, setDate] = useState(initialExpense?.date || new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(initialExpense?.date || todayDate);
   const [note, setNote] = useState(initialExpense?.note || '');
 
   const handleSubmit = (e: FormEvent) => {
@@ -40,10 +42,11 @@ export const ExpenseForm = ({ onClose, initialExpense }: ExpenseFormProps) => {
         note,
       });
     } else {
+      // When adding new expense, always use today's date
       addExpense({
         amount: parseFloat(amount),
         categoryId,
-        date,
+        date: todayDate,
         note,
       });
     }
@@ -90,18 +93,20 @@ export const ExpenseForm = ({ onClose, initialExpense }: ExpenseFormProps) => {
             <CategorySelect value={categoryId} onChange={setCategoryId} />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Date
-            </label>
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              required
-            />
-          </div>
+          {initialExpense && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Date
+              </label>
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required
+              />
+            </div>
+          )}
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
