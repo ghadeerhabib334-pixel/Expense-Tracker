@@ -2,7 +2,7 @@ import { useExpensesStore } from '../store/expensesStore';
 import { getDailyExpensesList, getMonthlyExpenses, getTotalSpent, formatCurrency } from '../utils/calculations';
 
 export const BudgetCard = () => {
-  const { expenses, budget, setBudget_ } = useExpensesStore();
+  const { expenses, budget } = useExpensesStore();
   const dailyExpenses = getDailyExpensesList(expenses);
   const monthlyExpenses = getMonthlyExpenses(expenses);
   const dailySpent = getTotalSpent(dailyExpenses);
