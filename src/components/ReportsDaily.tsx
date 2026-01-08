@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Expense } from '../types/Expense';
 import { useExpensesStore } from '../store/expensesStore';
 import { getDailyExpensesList, getTotalSpent, formatCurrency } from '../utils/calculations';
-import { formatDateFull } from '../utils/dateHelpers';
 import { ExpenseItem } from './ExpenseItem';
 import { subDays, addDays, isSameDay, format } from 'date-fns';
 
