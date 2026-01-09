@@ -6,11 +6,12 @@ import { ExpenseList } from '../components/ExpenseList';
 import { BudgetCard } from '../components/BudgetCard';
 import { Charts } from '../components/Charts';
 import { ThemeToggle } from '../components/ThemeToggle';
+import { formatCurrency } from '../utils/calculations';
 import { Expense } from '../types/Expense';
 import { Income } from '../types/Income';
 
 export const Dashboard = () => {
-  const { expenses, loadData, deleteExpense } = useExpensesStore();
+  const { expenses, walletTotal, loadData, deleteExpense } = useExpensesStore();
   const [showExpenseForm, setShowExpenseForm] = useState(false);
   const [showIncomeForm, setShowIncomeForm] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Expense | undefined>();
@@ -54,6 +55,14 @@ export const Dashboard = () => {
         </header>
 
         <div className="space-y-6">
+          {/* Wallet Total Card */}
+          <div className="bg-gradient-to-br from-green-600 to-green-700 dark:from-green-700 dark:to-green-800 rounded-xl p-6 text-white">
+            <div>
+              <h3 className="text-sm font-medium text-green-100 mb-1">Wallet Total</h3>
+              <div className="text-3xl font-bold">{formatCurrency(walletTotal)}</div>
+            </div>
+          </div>
+
           <BudgetCard />
 
           <Charts expenses={expenses} />

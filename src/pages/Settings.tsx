@@ -110,9 +110,21 @@ export const Settings = () => {
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Daily Limit (RON)
-                </label>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Daily Limit (RON)
+                  </label>
+                  <button
+                    onClick={() => {
+                      if (window.confirm('Are you sure you want to reset daily limit to 0?')) {
+                        setBudget({ ...budget, dailyLimit: 0 });
+                      }
+                    }}
+                    className="text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-medium"
+                  >
+                    Reset
+                  </button>
+                </div>
                 <input
                   type="number"
                   step="0.01"
