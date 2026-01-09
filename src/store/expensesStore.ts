@@ -3,13 +3,14 @@ import { Expense } from '../types/Expense';
 import { Income } from '../types/Income';
 import { Category } from '../types/Category';
 import { Budget } from '../types/Budget';
-import { loadExpenses, saveExpenses, loadIncome, saveIncome, loadCategories, saveCategories, loadBudget, saveBudget } from '../utils/storage';
+import { loadExpenses, saveExpenses, loadIncome, saveIncome, loadCategories, saveCategories, loadBudget, saveBudget, loadWalletTotal, saveWalletTotal } from '../utils/storage';
 
 interface ExpensesStore {
   expenses: Expense[];
   income: Income[];
   categories: Category[];
   budget: Budget;
+  walletTotal: number;
   addExpense: (expense: Omit<Expense, 'id'>) => void;
   updateExpense: (id: string, expense: Partial<Expense>) => void;
   deleteExpense: (id: string) => void;
@@ -20,6 +21,8 @@ interface ExpensesStore {
   updateCategory: (id: string, category: Partial<Category>) => void;
   deleteCategory: (id: string) => void;
   setBudget: (budget: Budget) => void;
+  setWalletTotal: (amount: number) => void;
+  resetWalletTotal: () => void;
   loadData: () => void;
 }
 
@@ -28,17 +31,20 @@ export const useExpensesStore = create<ExpensesStore>((set) => ({
   income: [],
   categories: [],
   budget: { dailyLimit: 0, monthlyLimit: 0 },
+  walletTotal: 0,
   
   loadData: () => {
     const expenses = loadExpenses();
     const income = loadIncome();
     const savedCategories = loadCategories();
     const budget = loadBudget();
+    const walletTotal = loadWalletTotal();
     set({ 
       expenses,
       income,
       categories: savedCategories || [],
-      budget 
+      budget,
+      walletTotal
     });
   },
   
@@ -140,5 +146,15 @@ export const useExpensesStore = create<ExpensesStore>((set) => ({
       saveIncome(updatedIncome);
       return { income: updatedIncome };
     });
+  },
+  
+  setWalletTotal: (amount) => {
+    saveWalletTotal(amount);
+    set({ walletTotal: amount });
+  },
+  
+  resetWalletTotal: () => {
+    saveWalletTotal(0);
+    set({ walletTotal: 0 });
   },
 }));

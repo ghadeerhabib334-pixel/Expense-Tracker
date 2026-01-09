@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { useExpensesStore } from '../store/expensesStore';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { Category } from '../types/Category';
+import { formatCurrency } from '../utils/calculations';
 
 export const Settings = () => {
-  const { budget, setBudget, categories, addCategory, updateCategory, deleteCategory } = useExpensesStore();
+  const { budget, setBudget, categories, addCategory, updateCategory, deleteCategory, walletTotal, setWalletTotal, resetWalletTotal } = useExpensesStore();
+  const [walletAmount, setWalletAmount] = useState('');
   const [showCategoryForm, setShowCategoryForm] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [categoryName, setCategoryName] = useState('');
@@ -53,6 +55,55 @@ export const Settings = () => {
         </header>
 
         <div className="space-y-6">
+          {/* Wallet Total */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Wallet Total</h2>
+            
+            <div className="space-y-4">
+              <div>
+                <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Current Wallet Total</div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {formatCurrency(walletTotal)}
+                  </div>
+                </div>
+                
+                <div className="flex gap-3 mb-4">
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={walletAmount}
+                    onChange={(e) => setWalletAmount(e.target.value)}
+                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter amount (RON)"
+                  />
+                  <button
+                    onClick={() => {
+                      const amount = parseFloat(walletAmount) || 0;
+                      setWalletTotal(amount);
+                      setWalletAmount('');
+                    }}
+                    disabled={!walletAmount || isNaN(parseFloat(walletAmount))}
+                    className="px-6 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Set
+                  </button>
+                </div>
+                
+                <button
+                  onClick={() => {
+                    if (window.confirm('Are you sure you want to reset wallet total to 0?')) {
+                      resetWalletTotal();
+                    }
+                  }}
+                  className="w-full px-4 py-2 bg-red-600 dark:bg-red-500 text-white rounded-lg font-medium hover:bg-red-700 dark:hover:bg-red-600 transition-colors"
+                >
+                  Reset to 0
+                </button>
+              </div>
+            </div>
+          </div>
+
           {/* Budget Limits */}
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Spending Limits</h2>

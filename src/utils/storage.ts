@@ -8,6 +8,7 @@ const INCOME_KEY = 'expense-tracker-income';
 const CATEGORIES_KEY = 'expense-tracker-categories';
 const BUDGET_KEY = 'expense-tracker-budget';
 const THEME_KEY = 'expense-tracker-theme';
+const WALLET_TOTAL_KEY = 'expense-tracker-wallet-total';
 
 export const loadExpenses = (): Expense[] => {
   try {
@@ -106,6 +107,23 @@ export const saveIncome = (income: Income[]): void => {
     localStorage.setItem(INCOME_KEY, JSON.stringify(income));
   } catch (error) {
     console.error('Failed to save income:', error);
+  }
+};
+
+export const loadWalletTotal = (): number => {
+  try {
+    const data = localStorage.getItem(WALLET_TOTAL_KEY);
+    return data ? parseFloat(data) : 0;
+  } catch {
+    return 0;
+  }
+};
+
+export const saveWalletTotal = (walletTotal: number): void => {
+  try {
+    localStorage.setItem(WALLET_TOTAL_KEY, walletTotal.toString());
+  } catch (error) {
+    console.error('Failed to save wallet total:', error);
   }
 };
 
