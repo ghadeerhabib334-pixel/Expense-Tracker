@@ -1,5 +1,6 @@
 import { useState, FormEvent } from 'react';
 import { useExpensesStore } from '../store/expensesStore';
+import { getTodayDateString } from '../utils/dateHelpers';
 
 interface IncomeFormProps {
   onClose: () => void;
@@ -15,7 +16,7 @@ interface IncomeFormProps {
 export const IncomeForm = ({ onClose, initialIncome }: IncomeFormProps) => {
   const { addIncome, updateIncome } = useExpensesStore();
   // When adding, always use today's date. When editing, use the income date.
-  const todayDate = new Date().toISOString().split('T')[0];
+  const todayDate = getTodayDateString();
   const [amount, setAmount] = useState(initialIncome?.amount.toString() || '');
   const [date, setDate] = useState(initialIncome?.date || todayDate);
   const [note, setNote] = useState(initialIncome?.note || '');
@@ -36,10 +37,11 @@ export const IncomeForm = ({ onClose, initialIncome }: IncomeFormProps) => {
         source: source || undefined,
       });
     } else {
-      // When adding new income, always use today's date
+      // When adding new income, always use today's date (get fresh date to ensure it's current)
+      const currentDate = getTodayDateString();
       addIncome({
         amount: parseFloat(amount),
-        date: todayDate,
+        date: currentDate,
         note,
         source: source || undefined,
       });

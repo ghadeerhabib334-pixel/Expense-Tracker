@@ -2,6 +2,15 @@ import { format, startOfMonth, endOfMonth, isWithinInterval, parseISO, isSameDay
 
 import { Expense } from '../types/Expense';
 
+// Get today's date in local timezone as YYYY-MM-DD string
+export const getTodayDateString = (): string => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 export const getDailyExpenses = (expenses: Expense[], date: Date = new Date()): Expense[] => {
   const targetDateString = format(date, 'yyyy-MM-dd');
   
@@ -43,4 +52,3 @@ export const isToday = (dateString: string): boolean => {
 export const isThisMonth = (dateString: string): boolean => {
   return isSameMonth(parseISO(dateString), new Date());
 };
-

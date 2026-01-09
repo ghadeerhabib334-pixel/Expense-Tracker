@@ -1,6 +1,7 @@
 import { useState, FormEvent } from 'react';
 import { useExpensesStore } from '../store/expensesStore';
 import { CategorySelect } from './CategorySelect';
+import { getTodayDateString } from '../utils/dateHelpers';
 
 interface ExpenseFormProps {
   onClose: () => void;
@@ -16,7 +17,7 @@ interface ExpenseFormProps {
 export const ExpenseForm = ({ onClose, initialExpense }: ExpenseFormProps) => {
   const { addExpense, updateExpense, categories } = useExpensesStore();
   // When adding, always use today's date. When editing, use the expense date.
-  const todayDate = new Date().toISOString().split('T')[0];
+  const todayDate = getTodayDateString();
   const [amount, setAmount] = useState(initialExpense?.amount.toString() || '');
   const [categoryId, setCategoryId] = useState(initialExpense?.categoryId || categories[0]?.id || '');
   const [date, setDate] = useState(initialExpense?.date || todayDate);
@@ -42,11 +43,12 @@ export const ExpenseForm = ({ onClose, initialExpense }: ExpenseFormProps) => {
         note,
       });
     } else {
-      // When adding new expense, always use today's date
+      // When adding new expense, always use today's date (get fresh date to ensure it's current)
+      const currentDate = getTodayDateString();
       addExpense({
         amount: parseFloat(amount),
         categoryId,
-        date: todayDate,
+        date: currentDate,
         note,
       });
     }
