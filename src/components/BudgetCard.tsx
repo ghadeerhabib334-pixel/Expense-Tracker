@@ -1,5 +1,5 @@
 import { useExpensesStore } from '../store/expensesStore';
-import { getDailyExpensesList, getMonthlyExpenses, getTotalSpent, formatCurrency } from '../utils/calculations';
+import { getDailyExpensesList, getMonthlyExpenses, getTotalSpent, formatCurrency, getEffectiveDailyLimit, calculateDailyCarryover } from '../utils/calculations';
 
 export const BudgetCard = () => {
   const { expenses, budget } = useExpensesStore();
@@ -8,9 +8,13 @@ export const BudgetCard = () => {
   const dailySpent = getTotalSpent(dailyExpenses);
   const monthlySpent = getTotalSpent(monthlyExpenses);
   
-  const dailyRemaining = budget.dailyLimit - dailySpent;
+  // Calculate cumulative daily limit (base + carryover from previous days)
+  const carryover = calculateDailyCarryover(expenses, budget.dailyLimit);
+  const effectiveDailyLimit = getEffectiveDailyLimit(expenses, budget.dailyLimit);
+  
+  const dailyRemaining = effectiveDailyLimit - dailySpent;
   const monthlyRemaining = budget.monthlyLimit - monthlySpent;
-  const dailyPercentage = budget.dailyLimit > 0 ? (dailySpent / budget.dailyLimit) * 100 : 0;
+  const dailyPercentage = effectiveDailyLimit > 0 ? (dailySpent / effectiveDailyLimit) * 100 : 0;
   const monthlyPercentage = budget.monthlyLimit > 0 ? (monthlySpent / budget.monthlyLimit) * 100 : 0;
 
   return (
@@ -20,7 +24,12 @@ export const BudgetCard = () => {
         <div className="flex justify-between items-start mb-4">
           <div>
             <h3 className="text-sm font-medium text-blue-100 mb-1">Daily Limit</h3>
-            <div className="text-3xl font-bold">{formatCurrency(budget.dailyLimit)}</div>
+            <div className="text-3xl font-bold">{formatCurrency(effectiveDailyLimit)}</div>
+            {carryover > 0 && (
+              <div className="text-xs text-blue-200 mt-1">
+                Base: {formatCurrency(budget.dailyLimit)} + Carryover: {formatCurrency(carryover)}
+              </div>
+            )}
           </div>
           <div className="text-right">
             <div className="text-sm text-blue-100 mb-1">Spent Today</div>
@@ -45,7 +54,7 @@ export const BudgetCard = () => {
           </div>
         </div>
 
-        {budget.dailyLimit > 0 && dailyPercentage > 100 && (
+        {effectiveDailyLimit > 0 && dailyPercentage > 100 && (
           <div className="mt-3 p-2 bg-red-500/30 rounded-lg text-sm text-red-100">
             ⚠️ You've exceeded your daily limit!
           </div>
