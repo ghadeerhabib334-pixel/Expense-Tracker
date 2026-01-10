@@ -52,3 +52,46 @@ export const isToday = (dateString: string): boolean => {
 export const isThisMonth = (dateString: string): boolean => {
   return isSameMonth(parseISO(dateString), new Date());
 };
+
+// Format datetime string to show date and time
+export const formatDateTime = (dateTimeString: string): string => {
+  // Handle backward compatibility: if it's just a date, add time
+  const isoString = dateTimeString.includes('T') ? dateTimeString : `${dateTimeString}T00:00:00`;
+  const date = parseISO(isoString);
+  // Only show time if it's not midnight (00:00:00)
+  const hasTime = dateTimeString.includes('T') && !dateTimeString.endsWith('T00:00:00');
+  if (hasTime) {
+    return format(date, 'dd MMM yyyy, HH:mm');
+  }
+  return format(date, 'dd MMM yyyy');
+};
+
+// Format time from datetime string (HH:mm)
+export const formatTime = (dateTimeString: string): string => {
+  if (!dateTimeString.includes('T')) return '';
+  
+  // Extract time part from datetime string
+  const timePart = dateTimeString.split('T')[1];
+  if (!timePart) return '';
+  
+  // Handle different time formats: "HH:mm:ss" or "HH:mm" or just "HH"
+  const timeMatch = timePart.match(/^(\d{1,2}):(\d{2})(?::\d{2})?/);
+  if (!timeMatch) return '';
+  
+  const hours = String(parseInt(timeMatch[1], 10)).padStart(2, '0');
+  const minutes = timeMatch[2];
+  
+  return `${hours}:${minutes}`;
+};
+
+// Get current datetime as ISO string (YYYY-MM-DDTHH:mm:ss)
+export const getCurrentDateTimeString = (): string => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+};

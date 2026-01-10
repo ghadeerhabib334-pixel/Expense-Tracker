@@ -1,7 +1,7 @@
 import { Expense } from '../types/Expense';
 import { useExpensesStore } from '../store/expensesStore';
 import { formatCurrency } from '../utils/calculations';
-import { formatDate } from '../utils/dateHelpers';
+import { formatTime } from '../utils/dateHelpers';
 
 interface ExpenseItemProps {
   expense: Expense;
@@ -12,6 +12,7 @@ interface ExpenseItemProps {
 export const ExpenseItem = ({ expense, onEdit, onDelete }: ExpenseItemProps) => {
   const { categories } = useExpensesStore();
   const category = categories.find(c => c.id === expense.categoryId) || categories[categories.length - 1] || { id: '', name: 'Other', color: '#6B7280' };
+  const timeString = formatTime(expense.date);
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 flex items-center justify-between">
@@ -23,7 +24,14 @@ export const ExpenseItem = ({ expense, onEdit, onDelete }: ExpenseItemProps) => 
         <div className="flex-1 min-w-0">
           <div className="font-medium text-gray-900 dark:text-white">{category.name}</div>
           <div className="text-sm text-gray-500 dark:text-gray-400 truncate">
-            {expense.note || formatDate(expense.date)}
+            {expense.note ? (
+              <span>
+                {expense.note}
+                {timeString && <span className="ml-2">• {timeString}</span>}
+              </span>
+            ) : (
+              <span>{timeString || 'No note'}</span>
+            )}
           </div>
         </div>
       </div>

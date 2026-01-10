@@ -1,7 +1,7 @@
 import { useState, FormEvent } from 'react';
 import { useExpensesStore } from '../store/expensesStore';
 import { CategorySelect } from './CategorySelect';
-import { getTodayDateString } from '../utils/dateHelpers';
+import { getCurrentDateTimeString, getTodayDateString } from '../utils/dateHelpers';
 
 interface ExpenseFormProps {
   onClose: () => void;
@@ -16,11 +16,32 @@ interface ExpenseFormProps {
 
 export const ExpenseForm = ({ onClose, initialExpense }: ExpenseFormProps) => {
   const { addExpense, updateExpense, categories } = useExpensesStore();
-  // When adding, always use today's date. When editing, use the expense date.
-  const todayDate = getTodayDateString();
+  // When adding, always use current datetime. When editing, use the expense datetime.
   const [amount, setAmount] = useState(initialExpense?.amount.toString() || '');
   const [categoryId, setCategoryId] = useState(initialExpense?.categoryId || categories[0]?.id || '');
-  const [date, setDate] = useState(initialExpense?.date || todayDate);
+  
+  // Extract date and time from existing expense or use current
+  const getInitialDate = () => {
+    if (initialExpense?.date) {
+      const datePart = initialExpense.date.split('T')[0];
+      return datePart;
+    }
+    return getTodayDateString();
+  };
+  
+  const getInitialTime = () => {
+    if (initialExpense?.date && initialExpense.date.includes('T')) {
+      const timePart = initialExpense.date.split('T')[1];
+      return timePart.substring(0, 5); // HH:mm
+    }
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+  };
+  
+  const [date, setDate] = useState(getInitialDate());
+  const [time, setTime] = useState(getInitialTime());
   const [note, setNote] = useState(initialExpense?.note || '');
 
   const handleSubmit = (e: FormEvent) => {
@@ -35,20 +56,23 @@ export const ExpenseForm = ({ onClose, initialExpense }: ExpenseFormProps) => {
       return;
     }
 
+    // Combine date and time into ISO datetime string
+    const dateTimeString = `${date}T${time}:00`;
+
     if (initialExpense) {
       updateExpense(initialExpense.id, {
         amount: parseFloat(amount),
         categoryId,
-        date,
+        date: dateTimeString,
         note,
       });
     } else {
-      // When adding new expense, always use today's date (get fresh date to ensure it's current)
-      const currentDate = getTodayDateString();
+      // When adding new expense, use current datetime (get fresh to ensure it's current)
+      const currentDateTime = getCurrentDateTimeString();
       addExpense({
         amount: parseFloat(amount),
         categoryId,
-        date: currentDate,
+        date: currentDateTime,
         note,
       });
     }
@@ -96,18 +120,32 @@ export const ExpenseForm = ({ onClose, initialExpense }: ExpenseFormProps) => {
           </div>
 
           {initialExpense && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Date
-              </label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-              />
-            </div>
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Date
+                </label>
+                <input
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Time
+                </label>
+                <input
+                  type="time"
+                  value={time}
+                  onChange={(e) => setTime(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+              </div>
+            </>
           )}
 
           <div>

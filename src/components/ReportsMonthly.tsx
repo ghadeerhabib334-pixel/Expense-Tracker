@@ -17,15 +17,24 @@ export const ReportsMonthly = ({ onEdit, onDelete }: ReportsMonthlyProps) => {
   const monthlyExpenses = getMonthlyExpenses(expenses, selectedMonth);
   const totalSpent = getTotalSpent(monthlyExpenses);
 
-  // Group expenses by date
+  // Group expenses by date (extract date part from datetime string)
   const expensesByDate = monthlyExpenses.reduce((acc, expense) => {
-    const dateKey = expense.date;
+    const dateKey = expense.date.split('T')[0]; // Get just the date part
     if (!acc[dateKey]) {
       acc[dateKey] = [];
     }
     acc[dateKey].push(expense);
     return acc;
   }, {} as Record<string, typeof monthlyExpenses>);
+  
+  // Sort expenses within each day by time (newest first)
+  Object.keys(expensesByDate).forEach(dateKey => {
+    expensesByDate[dateKey].sort((a, b) => {
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      return dateB - dateA; // Newest first
+    });
+  });
 
   const goToPreviousMonth = () => {
     setSelectedMonth(subMonths(selectedMonth, 1));
@@ -103,7 +112,8 @@ export const ReportsMonthly = ({ onEdit, onDelete }: ReportsMonthlyProps) => {
       ) : (
         <div className="space-y-4">
           {daysInMonth.map((day) => {
-            const dayExpenses = expensesByDate[day.toISOString().split('T')[0]] || [];
+            const dayKey = format(day, 'yyyy-MM-dd');
+            const dayExpenses = expensesByDate[dayKey] || [];
             if (dayExpenses.length === 0) return null;
 
             const dayTotal = getTotalSpent(dayExpenses);

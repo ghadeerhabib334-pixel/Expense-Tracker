@@ -15,6 +15,12 @@ export const ReportsDaily = ({ onEdit, onDelete }: ReportsDailyProps) => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   
   const dailyExpenses = getDailyExpensesList(expenses, selectedDate);
+  // Sort expenses by time (newest first)
+  const sortedDailyExpenses = [...dailyExpenses].sort((a, b) => {
+    const dateA = new Date(a.date).getTime();
+    const dateB = new Date(b.date).getTime();
+    return dateB - dateA; // Newest first
+  });
   const totalSpent = getTotalSpent(dailyExpenses);
 
   const goToPreviousDay = () => {
@@ -81,13 +87,13 @@ export const ReportsDaily = ({ onEdit, onDelete }: ReportsDailyProps) => {
         </div>
       </div>
 
-      {dailyExpenses.length === 0 ? (
+      {sortedDailyExpenses.length === 0 ? (
         <div className="text-center py-8 text-gray-500 dark:text-gray-400">
           No expenses for this day
         </div>
       ) : (
         <div className="space-y-2">
-          {dailyExpenses.map((expense) => (
+          {sortedDailyExpenses.map((expense) => (
             <ExpenseItem
               key={expense.id}
               expense={expense}
