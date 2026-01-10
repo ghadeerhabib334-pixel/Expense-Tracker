@@ -9,8 +9,8 @@ export const BudgetCard = () => {
   const monthlySpent = getTotalSpent(monthlyExpenses);
   
   // Calculate cumulative daily limit (base + carryover from previous days)
-  const carryover = calculateDailyCarryover(expenses, budget.dailyLimit);
-  const effectiveDailyLimit = getEffectiveDailyLimit(expenses, budget.dailyLimit);
+  const carryover = calculateDailyCarryover(expenses, budget.dailyLimit, budget.carryoverResetDate);
+  const effectiveDailyLimit = getEffectiveDailyLimit(expenses, budget.dailyLimit, budget.carryoverResetDate);
   
   const dailyRemaining = effectiveDailyLimit - dailySpent;
   const monthlyRemaining = budget.monthlyLimit - monthlySpent;

@@ -53,6 +53,10 @@ export const loadBudget = (): Budget => {
       if (typeof parsed === 'number') {
         return { dailyLimit: 0, monthlyLimit: parsed };
       }
+      // Ensure carryoverResetDate exists for old budgets
+      if (!parsed.carryoverResetDate) {
+        return { ...parsed, carryoverResetDate: undefined };
+      }
       return parsed;
     }
     return { dailyLimit: 0, monthlyLimit: 0 };

@@ -3,6 +3,7 @@ import { useExpensesStore } from '../store/expensesStore';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { Category } from '../types/Category';
 import { formatCurrency } from '../utils/calculations';
+import { getTodayDateString } from '../utils/dateHelpers';
 
 export const Settings = () => {
   const { budget, setBudget, categories, addCategory, updateCategory, deleteCategory, walletTotal, setWalletTotal, resetWalletTotal } = useExpensesStore();
@@ -116,8 +117,9 @@ export const Settings = () => {
                   </label>
                   <button
                     onClick={() => {
-                      if (window.confirm('Are you sure you want to reset daily limit to 0?')) {
-                        setBudget({ ...budget, dailyLimit: 0 });
+                      if (window.confirm('Are you sure you want to reset daily limit and carryover?')) {
+                        const todayDate = getTodayDateString();
+                        setBudget({ ...budget, dailyLimit: 0, carryoverResetDate: todayDate });
                       }
                     }}
                     className="text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-medium"

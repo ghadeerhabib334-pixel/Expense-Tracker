@@ -39,7 +39,7 @@ export const getWalletTotal = (income: Income[], expenses: Expense[]): number =>
   return totalIncome - totalExpenses;
 };
 
-export const calculateDailyCarryover = (expenses: Expense[], baseDailyLimit: number): number => {
+export const calculateDailyCarryover = (expenses: Expense[], baseDailyLimit: number, carryoverResetDate?: string): number => {
   if (baseDailyLimit <= 0) return 0;
   
   // Group expenses by date
@@ -53,17 +53,30 @@ export const calculateDailyCarryover = (expenses: Expense[], baseDailyLimit: num
   const todayStr = getTodayDateString();
   const today = parseISO(todayStr);
   
-  // Limit lookback to last 90 days for performance (adjustable)
-  // This means carryover resets after 90 days of inactivity
-  const maxLookbackDays = 90;
-  const startDate = addDays(today, -maxLookbackDays);
+  // Determine start date: use carryoverResetDate if provided, otherwise use 90 days ago
+  let startDate: Date;
+  if (carryoverResetDate) {
+    startDate = parseISO(carryoverResetDate);
+    // If reset date is today or in the future, there's no carryover yet
+    // We need to check if reset date is strictly before today (not equal)
+    const resetDateStr = format(startDate, 'yyyy-MM-dd');
+    if (resetDateStr >= todayStr) {
+      return 0; // Reset date is today or in the future, no carryover
+    }
+  } else {
+    // Limit lookback to last 90 days for performance (adjustable)
+    const maxLookbackDays = 90;
+    startDate = addDays(today, -maxLookbackDays);
+  }
   
   // Calculate cumulative carryover sequentially:
-  // Go through each day from start date to today, calculating carryover
+  // Go through each day from the day AFTER reset date (or start date) to today, calculating carryover
   // Each day gets base limit + unused amount from previous day
   let carryover = 0;
-  let currentDate = startDate;
+  // Start from the day after reset date (or start date) if reset date was set
+  let currentDate = carryoverResetDate ? addDays(startDate, 1) : startDate;
   
+  // Only process days strictly before today
   while (isBefore(currentDate, today)) {
     const dateStr = format(currentDate, 'yyyy-MM-dd');
     
@@ -82,8 +95,8 @@ export const calculateDailyCarryover = (expenses: Expense[], baseDailyLimit: num
   return carryover;
 };
 
-export const getEffectiveDailyLimit = (expenses: Expense[], baseDailyLimit: number): number => {
-  const carryover = calculateDailyCarryover(expenses, baseDailyLimit);
+export const getEffectiveDailyLimit = (expenses: Expense[], baseDailyLimit: number, carryoverResetDate?: string): number => {
+  const carryover = calculateDailyCarryover(expenses, baseDailyLimit, carryoverResetDate);
   return baseDailyLimit + carryover;
 };
 
