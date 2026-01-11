@@ -11,7 +11,10 @@ import { Expense } from '../types/Expense';
 import { Income } from '../types/Income';
 
 export const Dashboard = () => {
-  const { expenses, walletTotal, loadData, deleteExpense } = useExpensesStore();
+  const expenses = useExpensesStore((state) => state.expenses);
+  const walletTotal = useExpensesStore((state) => state.walletTotal);
+  const loadData = useExpensesStore((state) => state.loadData);
+  const deleteExpense = useExpensesStore((state) => state.deleteExpense);
   const [showExpenseForm, setShowExpenseForm] = useState(false);
   const [showIncomeForm, setShowIncomeForm] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Expense | undefined>();
