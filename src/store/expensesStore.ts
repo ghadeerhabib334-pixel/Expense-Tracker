@@ -55,26 +55,45 @@ export const useExpensesStore = create<ExpensesStore>((set) => ({
     };
     set((state) => {
       const updatedExpenses = [...state.expenses, newExpense];
+      const newWalletTotal = Math.max(0, state.walletTotal - newExpense.amount);
       saveExpenses(updatedExpenses);
-      return { expenses: updatedExpenses };
+      saveWalletTotal(newWalletTotal);
+      return { expenses: updatedExpenses, walletTotal: newWalletTotal };
     });
   },
   
   updateExpense: (id, updates) => {
     set((state) => {
+      const oldExpense = state.expenses.find((expense) => expense.id === id);
       const updatedExpenses = state.expenses.map((expense) =>
         expense.id === id ? { ...expense, ...updates } : expense
       );
+      const updatedExpense = updatedExpenses.find((expense) => expense.id === id);
+      
+      // Calculate wallet total adjustment
+      let walletAdjustment = 0;
+      if (oldExpense && updatedExpense) {
+        // Add back the old amount (undo original subtraction) and subtract the new amount
+        walletAdjustment = oldExpense.amount - updatedExpense.amount;
+      }
+      
+      const newWalletTotal = Math.max(0, state.walletTotal + walletAdjustment);
       saveExpenses(updatedExpenses);
-      return { expenses: updatedExpenses };
+      saveWalletTotal(newWalletTotal);
+      return { expenses: updatedExpenses, walletTotal: newWalletTotal };
     });
   },
   
   deleteExpense: (id) => {
     set((state) => {
+      const deletedExpense = state.expenses.find((expense) => expense.id === id);
       const updatedExpenses = state.expenses.filter((expense) => expense.id !== id);
+      const newWalletTotal = deletedExpense 
+        ? Math.max(0, state.walletTotal + deletedExpense.amount)
+        : state.walletTotal;
       saveExpenses(updatedExpenses);
-      return { expenses: updatedExpenses };
+      saveWalletTotal(newWalletTotal);
+      return { expenses: updatedExpenses, walletTotal: newWalletTotal };
     });
   },
   
@@ -125,26 +144,45 @@ export const useExpensesStore = create<ExpensesStore>((set) => ({
     };
     set((state) => {
       const updatedIncome = [...state.income, newIncome];
+      const newWalletTotal = state.walletTotal + newIncome.amount;
       saveIncome(updatedIncome);
-      return { income: updatedIncome };
+      saveWalletTotal(newWalletTotal);
+      return { income: updatedIncome, walletTotal: newWalletTotal };
     });
   },
   
   updateIncome: (id, updates) => {
     set((state) => {
+      const oldIncome = state.income.find((income) => income.id === id);
       const updatedIncome = state.income.map((income) =>
         income.id === id ? { ...income, ...updates } : income
       );
+      const updatedIncomeItem = updatedIncome.find((income) => income.id === id);
+      
+      // Calculate wallet total adjustment
+      let walletAdjustment = 0;
+      if (oldIncome && updatedIncomeItem) {
+        // Subtract old amount (undo original addition) and add new amount
+        walletAdjustment = updatedIncomeItem.amount - oldIncome.amount;
+      }
+      
+      const newWalletTotal = Math.max(0, state.walletTotal + walletAdjustment);
       saveIncome(updatedIncome);
-      return { income: updatedIncome };
+      saveWalletTotal(newWalletTotal);
+      return { income: updatedIncome, walletTotal: newWalletTotal };
     });
   },
   
   deleteIncome: (id) => {
     set((state) => {
+      const deletedIncome = state.income.find((income) => income.id === id);
       const updatedIncome = state.income.filter((income) => income.id !== id);
+      const newWalletTotal = deletedIncome 
+        ? Math.max(0, state.walletTotal - deletedIncome.amount)
+        : state.walletTotal;
       saveIncome(updatedIncome);
-      return { income: updatedIncome };
+      saveWalletTotal(newWalletTotal);
+      return { income: updatedIncome, walletTotal: newWalletTotal };
     });
   },
   

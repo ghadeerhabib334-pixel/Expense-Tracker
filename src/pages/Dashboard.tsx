@@ -6,7 +6,7 @@ import { ExpenseList } from '../components/ExpenseList';
 import { BudgetCard } from '../components/BudgetCard';
 import { Charts } from '../components/Charts';
 import { ThemeToggle } from '../components/ThemeToggle';
-import { formatCurrency } from '../utils/calculations';
+import { formatCurrency, getDailyExpensesList } from '../utils/calculations';
 import { Expense } from '../types/Expense';
 import { Income } from '../types/Income';
 
@@ -72,7 +72,7 @@ export const Dashboard = () => {
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Recent Expenses</h2>
             </div>
             <ExpenseList
-              expenses={expenses}
+              expenses={getDailyExpensesList(expenses)}
               onEdit={handleEdit}
               onDelete={handleDelete}
             />
