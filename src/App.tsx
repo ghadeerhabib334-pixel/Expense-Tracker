@@ -46,7 +46,7 @@ function App() {
           <Route path="/reports" element={<Reports />} />
           <Route path="/settings" element={<Settings />} />
         </Routes>
-        <BottomNav onAddExpense={handleAddExpense} onAddIncome={handleAddIncome} />
+        <BottomNav />
         {showExpenseForm && (
           <ExpenseForm
             onClose={handleCloseExpenseForm}

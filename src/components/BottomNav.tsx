@@ -1,11 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 
-interface BottomNavProps {
-  onAddExpense: () => void;
-  onAddIncome: () => void;
-}
-
-export const BottomNav = ({ onAddExpense, onAddIncome }: BottomNavProps) => {
+export const BottomNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -31,17 +26,6 @@ export const BottomNav = ({ onAddExpense, onAddIncome }: BottomNavProps) => {
             </svg>
             <span className="text-xs">Dashboard</span>
           </button>
-
-          {location.pathname === '/' && (
-            <button
-              onClick={onAddExpense}
-              className="fixed right-6 bottom-24 w-14 h-14 bg-red-600 dark:bg-red-500 text-white rounded-full shadow-lg hover:bg-red-700 dark:hover:bg-red-600 transition-colors flex items-center justify-center text-2xl font-bold z-40"
-              aria-label="Add expense"
-              title="Add Expense"
-            >
-              −
-            </button>
-          )}
 
           <button
             onClick={() => navigate('/sources')}
