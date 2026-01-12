@@ -3,6 +3,7 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { Dashboard } from './pages/Dashboard';
 import { Reports } from './pages/Reports';
 import { Settings } from './pages/Settings';
+import { Sources } from './pages/Sources';
 import { BottomNav } from './components/BottomNav';
 import { useState } from 'react';
 import { ExpenseForm } from './components/ExpenseForm';
@@ -41,6 +42,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Dashboard />} />
+          <Route path="/sources" element={<Sources />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/settings" element={<Settings />} />
         </Routes>

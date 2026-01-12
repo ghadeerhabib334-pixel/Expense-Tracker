@@ -3,7 +3,8 @@ import { Expense } from '../types/Expense';
 import { Income } from '../types/Income';
 import { Category } from '../types/Category';
 import { Budget } from '../types/Budget';
-import { loadExpenses, saveExpenses, loadIncome, saveIncome, loadCategories, saveCategories, loadBudget, saveBudget, loadWalletTotal, saveWalletTotal } from '../utils/storage';
+import { Source } from '../types/Source';
+import { loadExpenses, saveExpenses, loadIncome, saveIncome, loadCategories, saveCategories, loadBudget, saveBudget, loadWalletTotal, saveWalletTotal, loadSources, saveSources } from '../utils/storage';
 
 interface ExpensesStore {
   expenses: Expense[];
@@ -11,6 +12,7 @@ interface ExpensesStore {
   categories: Category[];
   budget: Budget;
   walletTotal: number;
+  sources: Source[];
   addExpense: (expense: Omit<Expense, 'id'>) => void;
   updateExpense: (id: string, expense: Partial<Expense>) => void;
   deleteExpense: (id: string) => void;
@@ -23,6 +25,11 @@ interface ExpensesStore {
   setBudget: (budget: Budget) => void;
   setWalletTotal: (amount: number) => void;
   resetWalletTotal: () => void;
+  addSource: (source: Omit<Source, 'id'>) => void;
+  updateSource: (id: string, source: Partial<Source>) => void;
+  deleteSource: (id: string) => void;
+  resetSource: (id: string) => void;
+  transferFromSource: (sourceId: string, amount: number) => void;
   loadData: () => void;
 }
 
@@ -32,6 +39,7 @@ export const useExpensesStore = create<ExpensesStore>((set) => ({
   categories: [],
   budget: { dailyLimit: 0, monthlyLimit: 0 },
   walletTotal: 0,
+  sources: [],
   
   loadData: () => {
     const expenses = loadExpenses();
@@ -39,12 +47,14 @@ export const useExpensesStore = create<ExpensesStore>((set) => ({
     const savedCategories = loadCategories();
     const budget = loadBudget();
     const walletTotal = loadWalletTotal();
+    const sources = loadSources();
     set({ 
       expenses,
       income,
       categories: savedCategories || [],
       budget,
-      walletTotal
+      walletTotal,
+      sources
     });
   },
   
@@ -194,5 +204,63 @@ export const useExpensesStore = create<ExpensesStore>((set) => ({
   resetWalletTotal: () => {
     saveWalletTotal(0);
     set({ walletTotal: 0 });
+  },
+  
+  addSource: (source) => {
+    const newSource: Source = {
+      ...source,
+      id: crypto.randomUUID(),
+    };
+    set((state) => {
+      const updatedSources = [...state.sources, newSource];
+      saveSources(updatedSources);
+      return { sources: updatedSources };
+    });
+  },
+  
+  updateSource: (id, updates) => {
+    set((state) => {
+      const updatedSources = state.sources.map((source) =>
+        source.id === id ? { ...source, ...updates } : source
+      );
+      saveSources(updatedSources);
+      return { sources: updatedSources };
+    });
+  },
+  
+  deleteSource: (id) => {
+    set((state) => {
+      const updatedSources = state.sources.filter((source) => source.id !== id);
+      saveSources(updatedSources);
+      return { sources: updatedSources };
+    });
+  },
+  
+  resetSource: (id) => {
+    set((state) => {
+      const updatedSources = state.sources.map((source) =>
+        source.id === id ? { ...source, value: 0 } : source
+      );
+      saveSources(updatedSources);
+      return { sources: updatedSources };
+    });
+  },
+  
+  transferFromSource: (sourceId, amount) => {
+    set((state) => {
+      const source = state.sources.find((s) => s.id === sourceId);
+      if (!source || source.value < amount) {
+        return state; // Can't transfer more than available
+      }
+      
+      const updatedSources = state.sources.map((s) =>
+        s.id === sourceId ? { ...s, value: s.value - amount } : s
+      );
+      const newWalletTotal = state.walletTotal + amount;
+      
+      saveSources(updatedSources);
+      saveWalletTotal(newWalletTotal);
+      return { sources: updatedSources, walletTotal: newWalletTotal };
+    });
   },
 }));

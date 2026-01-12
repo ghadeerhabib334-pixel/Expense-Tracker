@@ -2,6 +2,7 @@ import { Expense } from '../types/Expense';
 import { Income } from '../types/Income';
 import { Category } from '../types/Category';
 import { Budget } from '../types/Budget';
+import { Source } from '../types/Source';
 
 const STORAGE_KEY = 'expense-tracker-data';
 const INCOME_KEY = 'expense-tracker-income';
@@ -9,6 +10,7 @@ const CATEGORIES_KEY = 'expense-tracker-categories';
 const BUDGET_KEY = 'expense-tracker-budget';
 const THEME_KEY = 'expense-tracker-theme';
 const WALLET_TOTAL_KEY = 'expense-tracker-wallet-total';
+const SOURCES_KEY = 'expense-tracker-sources';
 
 export const loadExpenses = (): Expense[] => {
   try {
@@ -128,6 +130,23 @@ export const saveWalletTotal = (walletTotal: number): void => {
     localStorage.setItem(WALLET_TOTAL_KEY, walletTotal.toString());
   } catch (error) {
     console.error('Failed to save wallet total:', error);
+  }
+};
+
+export const loadSources = (): Source[] => {
+  try {
+    const data = localStorage.getItem(SOURCES_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch {
+    return [];
+  }
+};
+
+export const saveSources = (sources: Source[]): void => {
+  try {
+    localStorage.setItem(SOURCES_KEY, JSON.stringify(sources));
+  } catch (error) {
+    console.error('Failed to save sources:', error);
   }
 };
 

@@ -33,26 +33,27 @@ export const BottomNav = ({ onAddExpense, onAddIncome }: BottomNavProps) => {
           </button>
 
           {location.pathname === '/' && (
-            <>
-              <button
-                onClick={onAddIncome}
-                className="fixed left-6 bottom-24 w-14 h-14 bg-green-600 dark:bg-green-500 text-white rounded-full shadow-lg hover:bg-green-700 dark:hover:bg-green-600 transition-colors flex items-center justify-center text-2xl font-bold z-40"
-                aria-label="Add income"
-                title="Add Income"
-              >
-                +
-              </button>
-
-              <button
-                onClick={onAddExpense}
-                className="fixed right-6 bottom-24 w-14 h-14 bg-red-600 dark:bg-red-500 text-white rounded-full shadow-lg hover:bg-red-700 dark:hover:bg-red-600 transition-colors flex items-center justify-center text-2xl font-bold z-40"
-                aria-label="Add expense"
-                title="Add Expense"
-              >
-                −
-              </button>
-            </>
+            <button
+              onClick={onAddExpense}
+              className="fixed right-6 bottom-24 w-14 h-14 bg-red-600 dark:bg-red-500 text-white rounded-full shadow-lg hover:bg-red-700 dark:hover:bg-red-600 transition-colors flex items-center justify-center text-2xl font-bold z-40"
+              aria-label="Add expense"
+              title="Add Expense"
+            >
+              −
+            </button>
           )}
+
+          <button
+            onClick={() => navigate('/sources')}
+            className={`flex flex-col items-center justify-center flex-1 h-full ${
+              isActive('/sources') ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'
+            }`}
+          >
+            <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span className="text-xs">Sources</span>
+          </button>
 
           <button
             onClick={() => navigate('/reports')}
