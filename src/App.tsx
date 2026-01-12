@@ -17,16 +17,6 @@ function App() {
   const [editingExpense, setEditingExpense] = useState<Expense | undefined>();
   const [editingIncome, setEditingIncome] = useState<Income | undefined>();
 
-  const handleAddExpense = () => {
-    setEditingExpense(undefined);
-    setShowExpenseForm(true);
-  };
-
-  const handleAddIncome = () => {
-    setEditingIncome(undefined);
-    setShowIncomeForm(true);
-  };
-
   const handleCloseExpenseForm = () => {
     setShowExpenseForm(false);
     setEditingExpense(undefined);
