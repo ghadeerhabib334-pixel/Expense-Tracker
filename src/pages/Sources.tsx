@@ -5,7 +5,10 @@ import { Source } from '../types/Source';
 import { formatCurrency } from '../utils/calculations';
 
 export const Sources = () => {
-  const { sources, addSource, updateSource, deleteSource, resetSource, transferFromSource, walletTotal, loadData } = useExpensesStore();
+  const { sources, addSource, updateSource, deleteSource, transferFromSource, walletTotal, loadData } = useExpensesStore();
+  
+  // Calculate total of all sources
+  const totalSources = sources.reduce((sum, source) => sum + source.value, 0);
   const [showSourceForm, setShowSourceForm] = useState(false);
   const [editingSource, setEditingSource] = useState<Source | null>(null);
   const [sourceName, setSourceName] = useState('');
@@ -43,11 +46,6 @@ export const Sources = () => {
     }
   };
 
-  const handleResetSource = (id: string) => {
-    if (window.confirm('Are you sure you want to reset this source value to 0?')) {
-      resetSource(id);
-    }
-  };
 
   const handleTransfer = (sourceId: string) => {
     const amountStr = transferAmounts[sourceId] || '';
@@ -174,6 +172,16 @@ export const Sources = () => {
             </div>
           )}
 
+          {/* Total Sources */}
+          {sources.length > 0 && (
+            <div className="bg-gradient-to-br from-blue-600 to-blue-700 dark:from-blue-700 dark:to-blue-800 rounded-xl p-6 text-white">
+              <div>
+                <h3 className="text-sm font-medium text-blue-100 mb-1">Total Sources</h3>
+                <div className="text-3xl font-bold">{formatCurrency(totalSources)}</div>
+              </div>
+            </div>
+          )}
+
           {/* Sources List */}
           <div className="space-y-4">
             {sources.length === 0 ? (
@@ -245,12 +253,6 @@ export const Sources = () => {
                         </button>
                       )}
                     </div>
-                    <button
-                      onClick={() => handleResetSource(source.id)}
-                      className="w-full px-4 py-2 bg-red-600 dark:bg-red-500 text-white rounded-lg font-medium hover:bg-red-700 dark:hover:bg-red-600 transition-colors"
-                    >
-                      Reset to 0
-                    </button>
                   </div>
                 </div>
               ))
