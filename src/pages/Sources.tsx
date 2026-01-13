@@ -14,11 +14,32 @@ export const Sources = () => {
   const [sourceName, setSourceName] = useState('');
   const [sourceValue, setSourceValue] = useState('');
   const [transferAmounts, setTransferAmounts] = useState<Record<string, string>>({});
+  
+  // Exchange rate state (RON to EUR)
+  const [exchangeRate, setExchangeRate] = useState(() => {
+    const saved = localStorage.getItem('ronToEurRate');
+    return saved ? parseFloat(saved) : 5.0; // Default to 5.0 if not set
+  });
+  const [showExchangeRateModal, setShowExchangeRateModal] = useState(false);
+  const [exchangeRateInput, setExchangeRateInput] = useState('');
+  
+  // Calculate EUR total
+  const totalSourcesEUR = totalSources / exchangeRate;
 
   useEffect(() => {
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleSaveExchangeRate = () => {
+    const rate = parseFloat(exchangeRateInput);
+    if (rate > 0) {
+      setExchangeRate(rate);
+      localStorage.setItem('ronToEurRate', rate.toString());
+      setShowExchangeRateModal(false);
+      setExchangeRateInput('');
+    }
+  };
 
   const handleSaveSource = () => {
     const value = parseFloat(sourceValue) || 0;
@@ -100,21 +121,6 @@ export const Sources = () => {
             </div>
           </div>
 
-          {/* Add Source Button */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-            <button
-              onClick={() => {
-                setShowSourceForm(true);
-                setEditingSource(null);
-                setSourceName('');
-                setSourceValue('');
-              }}
-              className="w-full px-4 py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
-            >
-              + Add Source
-            </button>
-          </div>
-
           {/* Source Form */}
           {showSourceForm && (
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
@@ -174,12 +180,41 @@ export const Sources = () => {
 
           {/* Total Sources */}
           {sources.length > 0 && (
-            <div className="bg-gradient-to-br from-blue-600 to-blue-700 dark:from-blue-700 dark:to-blue-800 rounded-xl p-6 text-white">
-              <div>
-                <h3 className="text-sm font-medium text-blue-100 mb-1">Total Sources</h3>
-                <div className="text-3xl font-bold">{formatCurrency(totalSources)}</div>
+            <>
+              <div className="bg-gradient-to-br from-blue-600 to-blue-700 dark:from-blue-700 dark:to-blue-800 rounded-xl p-6 text-white">
+                <div>
+                  <h3 className="text-sm font-medium text-blue-100 mb-1">Total Sources</h3>
+                  <div className="text-3xl font-bold">{formatCurrency(totalSources)}</div>
+                </div>
               </div>
-            </div>
+              
+              {/* Total Sources in EUR */}
+              <div className="bg-gradient-to-br from-purple-600 to-purple-700 dark:from-purple-700 dark:to-purple-800 rounded-xl p-6 text-white relative">
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <h3 className="text-sm font-medium text-purple-100">Total Sources (EUR)</h3>
+                    <button
+                      onClick={() => {
+                        setShowExchangeRateModal(true);
+                        setExchangeRateInput(exchangeRate.toString());
+                      }}
+                      className="text-xs px-2 py-1 bg-white/20 hover:bg-white/30 rounded text-purple-100 transition-colors"
+                      title="Set exchange rate"
+                    >
+                      Rate: {exchangeRate.toFixed(4)}
+                    </button>
+                  </div>
+                  <div className="text-3xl font-bold">
+                    {new Intl.NumberFormat('de-DE', {
+                      style: 'currency',
+                      currency: 'EUR',
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    }).format(totalSourcesEUR)}
+                  </div>
+                </div>
+              </div>
+            </>
           )}
 
           {/* Sources List */}
@@ -258,7 +293,70 @@ export const Sources = () => {
               ))
             )}
           </div>
+
+          {/* Add Source Button */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+            <button
+              onClick={() => {
+                setShowSourceForm(true);
+                setEditingSource(null);
+                setSourceName('');
+                setSourceValue('');
+              }}
+              className="w-full px-4 py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
+            >
+              + Add Source
+            </button>
+          </div>
         </div>
+
+        {/* Exchange Rate Modal */}
+        {showExchangeRateModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md mx-4 p-6">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                Set Exchange Rate (RON to EUR)
+              </h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Exchange Rate
+                  </label>
+                  <input
+                    type="number"
+                    step="0.0001"
+                    min="0.0001"
+                    value={exchangeRateInput}
+                    onChange={(e) => setExchangeRateInput(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="5.0000"
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    How many RON = 1 EUR
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleSaveExchangeRate}
+                    disabled={!exchangeRateInput || isNaN(parseFloat(exchangeRateInput)) || parseFloat(exchangeRateInput) <= 0}
+                    className="flex-1 bg-purple-600 dark:bg-purple-500 text-white py-2 rounded-lg font-medium hover:bg-purple-700 dark:hover:bg-purple-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowExchangeRateModal(false);
+                      setExchangeRateInput('');
+                    }}
+                    className="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
