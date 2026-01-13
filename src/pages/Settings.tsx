@@ -1,11 +1,16 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useExpensesStore } from '../store/expensesStore';
+import { useAuthStore } from '../store/authStore';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { Category } from '../types/Category';
 import { formatCurrency } from '../utils/calculations';
 import { getTodayDateString } from '../utils/dateHelpers';
 
 export const Settings = () => {
+  const navigate = useNavigate();
+  const logout = useAuthStore((state) => state.logout);
+  const currentUser = useAuthStore((state) => state.currentUser);
   const { budget, setBudget, categories, addCategory, updateCategory, deleteCategory, walletTotal, setWalletTotal, resetWalletTotal } = useExpensesStore();
   const [walletAmount, setWalletAmount] = useState('');
   const [showCategoryForm, setShowCategoryForm] = useState(false);
@@ -262,6 +267,31 @@ export const Settings = () => {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Account Section */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Account</h2>
+            <div className="space-y-4">
+              {currentUser && (
+                <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Logged in as</div>
+                  <div className="text-lg font-semibold text-gray-900 dark:text-white">{currentUser.username}</div>
+                  <div className="text-sm text-gray-500 dark:text-gray-400">{currentUser.email}</div>
+                </div>
+              )}
+              <button
+                onClick={() => {
+                  if (window.confirm('Are you sure you want to log out?')) {
+                    logout();
+                    navigate('/login');
+                  }
+                }}
+                className="w-full px-4 py-3 bg-red-600 dark:bg-red-500 text-white rounded-lg font-medium hover:bg-red-700 dark:hover:bg-red-600 transition-colors"
+              >
+                Logout
+              </button>
             </div>
           </div>
         </div>
