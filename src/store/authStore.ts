@@ -82,15 +82,18 @@ export const useAuthStore = create<AuthStore>((set) => ({
   register: (email: string, username: string, password: string) => {
     const users = loadUsers();
     
-    // Check if email or username already exists
-    if (users.some((u) => u.email === email || u.username === username)) {
+    // Normalize email to lowercase for case-insensitive comparison
+    const normalizedEmail = email.toLowerCase().trim();
+    
+    // Check if email or username already exists (case-insensitive for email)
+    if (users.some((u) => u.email.toLowerCase() === normalizedEmail || u.username.toLowerCase() === username.toLowerCase().trim())) {
       return false;
     }
     
     const newUser: User = {
       id: crypto.randomUUID(),
-      email,
-      username,
+      email: normalizedEmail, // Store email in lowercase
+      username: username.trim(),
       password, // In production, hash this
       createdAt: new Date().toISOString(),
     };
