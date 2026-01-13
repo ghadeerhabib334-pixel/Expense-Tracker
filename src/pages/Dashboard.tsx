@@ -82,19 +82,13 @@ export const Dashboard = () => {
           </div>
         </div>
 
-        {/* Floating Action Buttons */}
-        <div className="fixed bottom-32 left-0 right-0 max-w-2xl mx-auto px-4 flex justify-between gap-4 z-40">
+        {/* Floating Action Button */}
+        <div className="fixed bottom-32 left-4 max-w-2xl mx-auto z-40">
           <button
             onClick={() => setShowExpenseForm(true)}
-            className="flex-1 bg-red-600 dark:bg-red-500 text-white py-4 rounded-xl font-bold text-xl shadow-lg hover:bg-red-700 dark:hover:bg-red-600 transition-colors"
+            className="w-14 h-14 bg-red-600 dark:bg-red-500 text-white rounded-full font-bold text-2xl shadow-lg hover:bg-red-700 dark:hover:bg-red-600 transition-colors flex items-center justify-center"
           >
-            - Expense
-          </button>
-          <button
-            onClick={() => setShowIncomeForm(true)}
-            className="flex-1 bg-green-600 dark:bg-green-500 text-white py-4 rounded-xl font-bold text-xl shadow-lg hover:bg-green-700 dark:hover:bg-green-600 transition-colors"
-          >
-            + Income
+            -
           </button>
         </div>
 
