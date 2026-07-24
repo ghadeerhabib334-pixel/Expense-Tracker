@@ -136,7 +136,9 @@ export const saveWalletTotal = (walletTotal: number): void => {
 export const loadSources = (): Source[] => {
   try {
     const data = localStorage.getItem(SOURCES_KEY);
-    return data ? JSON.parse(data) : [];
+    const sources: Array<Partial<Source> & Pick<Source, 'id' | 'name' | 'value'>> = data ? JSON.parse(data) : [];
+    // Existing sources were stored in lei before currency selection was added.
+    return sources.map((source) => ({ ...source, currency: source.currency || 'RON' }));
   } catch {
     return [];
   }
@@ -149,4 +151,3 @@ export const saveSources = (sources: Source[]): void => {
     console.error('Failed to save sources:', error);
   }
 };
-

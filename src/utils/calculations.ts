@@ -29,6 +29,13 @@ export const formatCurrency = (amount: number): string => {
   }).format(amount);
 };
 
+export const formatCurrencyIn = (amount: number, currency: 'RON' | 'EUR'): string => {
+  return new Intl.NumberFormat(currency === 'RON' ? 'ro-RO' : 'de-DE', {
+    style: 'currency',
+    currency,
+  }).format(amount);
+};
+
 export const getTotalIncome = (income: Income[]): number => {
   return income.reduce((total, income) => total + income.amount, 0);
 };
@@ -102,4 +109,3 @@ export const getEffectiveDailyLimit = (expenses: Expense[], baseDailyLimit: numb
 
 // Re-export formatDate from dateHelpers
 export { formatDate } from './dateHelpers';
-

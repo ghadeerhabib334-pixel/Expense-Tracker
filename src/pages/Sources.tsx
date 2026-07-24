@@ -1,18 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useExpensesStore } from '../store/expensesStore';
 import { ThemeToggle } from '../components/ThemeToggle';
-import { Source } from '../types/Source';
-import { formatCurrency } from '../utils/calculations';
+import { Source, SourceCurrency } from '../types/Source';
+import { formatCurrency, formatCurrencyIn } from '../utils/calculations';
 
 export const Sources = () => {
   const { sources, addSource, updateSource, deleteSource, transferFromSource, walletTotal, loadData } = useExpensesStore();
   
-  // Calculate total of all sources
-  const totalSources = sources.reduce((sum, source) => sum + source.value, 0);
   const [showSourceForm, setShowSourceForm] = useState(false);
   const [editingSource, setEditingSource] = useState<Source | null>(null);
   const [sourceName, setSourceName] = useState('');
   const [sourceValue, setSourceValue] = useState('');
+  const [sourceCurrency, setSourceCurrency] = useState<SourceCurrency>('RON');
   const [transferAmounts, setTransferAmounts] = useState<Record<string, string>>({});
   
   // Exchange rate state (RON to EUR)
@@ -23,8 +22,12 @@ export const Sources = () => {
   const [showExchangeRateModal, setShowExchangeRateModal] = useState(false);
   const [exchangeRateInput, setExchangeRateInput] = useState('');
   
-  // Calculate EUR total
-  const totalSourcesEUR = totalSources / exchangeRate;
+  // Normalize mixed-currency sources for combined totals.
+  const totalSourcesRON = sources.reduce(
+    (sum, source) => sum + (source.currency === 'EUR' ? source.value * exchangeRate : source.value),
+    0
+  );
+  const totalSourcesEUR = totalSourcesRON / exchangeRate;
 
   useEffect(() => {
     loadData();
@@ -44,20 +47,22 @@ export const Sources = () => {
   const handleSaveSource = () => {
     const value = parseFloat(sourceValue) || 0;
     if (editingSource) {
-      updateSource(editingSource.id, { name: sourceName, value });
+      updateSource(editingSource.id, { name: sourceName, value, currency: sourceCurrency });
     } else {
-      addSource({ name: sourceName, value });
+      addSource({ name: sourceName, value, currency: sourceCurrency });
     }
     setShowSourceForm(false);
     setEditingSource(null);
     setSourceName('');
     setSourceValue('');
+    setSourceCurrency('RON');
   };
 
   const handleEditSource = (source: Source) => {
     setEditingSource(source);
     setSourceName(source.name);
     setSourceValue(source.value.toString());
+    setSourceCurrency(source.currency || 'RON');
     setShowSourceForm(true);
   };
 
@@ -83,8 +88,9 @@ export const Sources = () => {
       return;
     }
 
-    if (window.confirm(`Transfer ${formatCurrency(amount)} from ${source.name} to wallet?`)) {
-      transferFromSource(sourceId, amount);
+    const walletAmount = source.currency === 'EUR' ? amount * exchangeRate : amount;
+    if (window.confirm(`Transfer ${formatCurrencyIn(amount, source.currency)} from ${source.name} to wallet (${formatCurrency(walletAmount)})?`)) {
+      transferFromSource(sourceId, amount, walletAmount);
       setTransferAmounts({ ...transferAmounts, [sourceId]: '' });
     }
   };
@@ -95,8 +101,9 @@ export const Sources = () => {
       return;
     }
 
-    if (window.confirm(`Transfer all ${formatCurrency(source.value)} from ${source.name} to wallet?`)) {
-      transferFromSource(sourceId, source.value);
+    const walletAmount = source.currency === 'EUR' ? source.value * exchangeRate : source.value;
+    if (window.confirm(`Transfer all ${formatCurrencyIn(source.value, source.currency)} from ${source.name} to wallet (${formatCurrency(walletAmount)})?`)) {
+      transferFromSource(sourceId, source.value, walletAmount);
       setTransferAmounts({ ...transferAmounts, [sourceId]: '' });
     }
   };
@@ -142,7 +149,7 @@ export const Sources = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Value (RON)
+                    Value
                   </label>
                   <input
                     type="number"
@@ -153,6 +160,19 @@ export const Sources = () => {
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="0.00"
                   />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Currency
+                  </label>
+                  <select
+                    value={sourceCurrency}
+                    onChange={(e) => setSourceCurrency(e.target.value as SourceCurrency)}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="RON">Lei (RON)</option>
+                    <option value="EUR">Euro (EUR)</option>
+                  </select>
                 </div>
                 <div className="flex gap-2">
                   <button
@@ -168,6 +188,7 @@ export const Sources = () => {
                       setEditingSource(null);
                       setSourceName('');
                       setSourceValue('');
+                      setSourceCurrency('RON');
                     }}
                     className="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
                   >
@@ -184,7 +205,7 @@ export const Sources = () => {
               <div className="bg-gradient-to-br from-blue-600 to-blue-700 dark:from-blue-700 dark:to-blue-800 rounded-xl p-6 text-white">
                 <div>
                   <h3 className="text-sm font-medium text-blue-100 mb-1">Total Sources</h3>
-                  <div className="text-3xl font-bold">{formatCurrency(totalSources)}</div>
+                  <div className="text-3xl font-bold">{formatCurrency(totalSourcesRON)}</div>
                 </div>
               </div>
               
@@ -233,7 +254,7 @@ export const Sources = () => {
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{source.name}</h3>
                       <p className="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">
-                        {formatCurrency(source.value)}
+                        {formatCurrencyIn(source.value, source.currency || 'RON')}
                       </p>
                     </div>
                     <div className="flex gap-2">
@@ -302,6 +323,7 @@ export const Sources = () => {
                 setEditingSource(null);
                 setSourceName('');
                 setSourceValue('');
+                setSourceCurrency('RON');
               }}
               className="w-full px-4 py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
             >

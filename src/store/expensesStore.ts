@@ -29,7 +29,7 @@ interface ExpensesStore {
   updateSource: (id: string, source: Partial<Source>) => void;
   deleteSource: (id: string) => void;
   resetSource: (id: string) => void;
-  transferFromSource: (sourceId: string, amount: number) => void;
+  transferFromSource: (sourceId: string, amount: number, walletAmount?: number) => void;
   loadData: () => void;
 }
 
@@ -246,7 +246,7 @@ export const useExpensesStore = create<ExpensesStore>((set) => ({
     });
   },
   
-  transferFromSource: (sourceId, amount) => {
+  transferFromSource: (sourceId, amount, walletAmount = amount) => {
     set((state) => {
       const source = state.sources.find((s) => s.id === sourceId);
       if (!source || source.value < amount) {
@@ -256,7 +256,7 @@ export const useExpensesStore = create<ExpensesStore>((set) => ({
       const updatedSources = state.sources.map((s) =>
         s.id === sourceId ? { ...s, value: s.value - amount } : s
       );
-      const newWalletTotal = state.walletTotal + amount;
+      const newWalletTotal = state.walletTotal + walletAmount;
       
       saveSources(updatedSources);
       saveWalletTotal(newWalletTotal);
